@@ -2,6 +2,11 @@
 
 Sorts your bank into categories, shows you the finished layout instantly, and guides you through tidying it one move at a time.
 
+- **Preview** your whole bank already organised, as a tag tab you can use straight away.
+- **Organise** with highlights that show the item to move and where it goes, using the fewest moves possible.
+- **Categories** you can rename, recolour and assign to any tab, with smart ordering inside each one.
+- **Works with Alch Ledger**, so its outlines stay out of the way and profitable alchs can sit together.
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/iotaaa/bank-steward/main/images/overview.png" alt="Bank Steward overview">
 </p>
