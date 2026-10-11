@@ -8,7 +8,7 @@ Pick which tab each category goes in, press **Preview** to see the result, then 
 - Plans every tab, not just the one you're looking at
 - Keeps related items together, from armour sets to herbs and their secondaries
 
-
+       
 <p align="center">
   <img src="https://raw.githubusercontent.com/iotaaa/bank-steward/main/images/overview.png" alt="Bank Steward overview">
 </p>
