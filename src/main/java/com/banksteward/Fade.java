@@ -13,6 +13,14 @@ final class Fade
 	{
 	}
 
+	/**
+	 * A category colour at the player's chosen opacity (percent).
+	 */
+	static Color category(Color c, int percent)
+	{
+		return new Color(c.getRed(), c.getGreen(), c.getBlue(), Math.round(255 * percent / 100f));
+	}
+
 	static Color of(Color c)
 	{
 		return new Color(c.getRed(), c.getGreen(), c.getBlue(), Math.round(c.getAlpha() * AMOUNT));

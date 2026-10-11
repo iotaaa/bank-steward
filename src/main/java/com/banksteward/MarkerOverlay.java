@@ -47,17 +47,17 @@ class MarkerOverlay extends WidgetItemOverlay
 		Rectangle r = widgetItem.getCanvasBounds();
 		Category category = item.getCategory();
 		BankStewardConfig.MarkerStyle style = config.markerStyle();
-		if (category != null && style != BankStewardConfig.MarkerStyle.NONE)
+		if (config.showCategoryMarkers() && category != null && style != BankStewardConfig.MarkerStyle.NONE)
 		{
-			Color c = category.getColor();
-			g.setColor(Fade.of(new Color(c.getRed(), c.getGreen(), c.getBlue(), config.markerOpacity())));
+			g.setColor(Fade.category(category.getColor(), config.categoryOpacity()));
 			switch (style)
 			{
 				case CORNER:
+					// bottom-right, clear of the quantity number in the top-left
 					Polygon corner = new Polygon();
-					corner.addPoint(r.x, r.y);
-					corner.addPoint(r.x + 9, r.y);
-					corner.addPoint(r.x, r.y + 9);
+					corner.addPoint(r.x + r.width, r.y + r.height);
+					corner.addPoint(r.x + r.width - 9, r.y + r.height);
+					corner.addPoint(r.x + r.width, r.y + r.height - 9);
 					g.fillPolygon(corner);
 					break;
 				case BAR:
@@ -75,7 +75,7 @@ class MarkerOverlay extends WidgetItemOverlay
 		if (config.highlightTabIcons() && plan != null && !plugin.isTagTabOpen()
 			&& plan.getTabIcons().contains(item.getSlot()))
 		{
-			// reserved as the tab's icon: gold frame and a gold corner opposite the category marker
+			// reserved as the tab's icon: gold frame and a gold corner in the top-right
 			g.setColor(Fade.of(TAB_ICON));
 			g.drawRect(r.x, r.y, r.width - 1, r.height - 1);
 			Polygon corner = new Polygon();

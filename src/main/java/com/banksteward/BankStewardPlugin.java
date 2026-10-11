@@ -140,6 +140,7 @@ public class BankStewardPlugin extends Plugin
 	@Getter
 	private int numTabs;
 	private int startOutOfPlace;
+	private String lastLoggedView;
 
 	@Provides
 	BankStewardConfig provideConfig(ConfigManager configManager)
@@ -336,6 +337,7 @@ public class BankStewardPlugin extends Plugin
 		itemsById = byId;
 
 		plan = Planner.plan(list, tabSizes, getViewTab(), comparator(), config.keepTabIcons());
+		logTabOrder(list, getViewTab());
 		if (guideActive)
 		{
 			if (plan.getNext().getType() == Planner.StepType.DONE)
@@ -347,6 +349,60 @@ public class BankStewardPlugin extends Plugin
 			startOutOfPlace = Math.max(startOutOfPlace, plan.getOutOfPlace());
 		}
 		pushToPanel();
+	}
+
+	// ---- Debug logging, to find out why something sorted where it did ----
+
+	/**
+	 * Logs the viewed tab's current and wanted order once per bank open or tab change.
+	 */
+	private void logTabOrder(List<BankItem> items, int viewTab)
+	{
+		if (!log.isDebugEnabled() || !isBankOpen())
+		{
+			lastLoggedView = null;
+			return;
+		}
+		String view = viewTab + "/" + items.size();
+		if (view.equals(lastLoggedView))
+		{
+			return;
+		}
+		lastLoggedView = view;
+		List<BankItem> tab = new ArrayList<>();
+		for (BankItem b : items)
+		{
+			if (b.getTab() == viewTab)
+			{
+				tab.add(b);
+			}
+		}
+		logOrder("Tab " + viewTab + " current order", tab);
+		List<BankItem> wanted = new ArrayList<>(tab);
+		wanted.sort(comparator());
+		logOrder("Tab " + viewTab + " wanted order (before keeping the icon)", wanted);
+	}
+
+	private void logOrder(String title, List<BankItem> items)
+	{
+		if (!log.isDebugEnabled())
+		{
+			return;
+		}
+		StringBuilder sb = new StringBuilder(title).append(':');
+		for (BankItem b : items)
+		{
+			ItemInfo i = b.getInfo();
+			sb.append("\n  ").append(i.getName())
+				.append(" [id ").append(i.getId())
+				.append(", ").append(b.getCategory() == null ? "no category" : b.getCategory().getName())
+				.append(", ").append(i.getRule())
+				.append(i.getRule() == Rule.GEAR
+					? ", " + ItemSorter.blockKey(b) + ", style " + ItemSorter.style(i)
+					: ", group " + i.getGroup() + ", family " + i.getFamily() + ", rank " + i.getRank())
+				.append(']');
+		}
+		log.debug(sb.toString());
 	}
 
 	// ---- Alch Ledger ----
@@ -637,6 +693,7 @@ public class BankStewardPlugin extends Plugin
 	{
 		List<BankItem> sorted = new ArrayList<>(bankItems);
 		sorted.sort(comparator());
+		logOrder("Preview order", sorted);
 		List<Integer> layout = new ArrayList<>();
 		Set<Integer> ids = new HashSet<>();
 		String lastCategory = null;

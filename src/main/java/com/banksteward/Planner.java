@@ -143,10 +143,24 @@ final class Planner
 			}
 		}
 		int outOfPlace = feasible.size();
+		// With a kept icon, the icon's own group (its armour set, its kind of food...) comes straight after it,
+		// so the icon doesn't split its group from the rest
+		Map<Integer, Comparator<BankItem>> orderByTab = new HashMap<>();
+		for (BankItem b : items)
+		{
+			if (icons.contains(b.getSlot()))
+			{
+				String block = ItemSorter.blockKey(b);
+				orderByTab.put(b.getTab(), Comparator
+					.comparing((BankItem x) -> !ItemSorter.blockKey(x).equals(block))
+					.thenComparing(order));
+			}
+		}
+
 		Map<Integer, int[]> lisByTab = new HashMap<>();
 		for (Map.Entry<Integer, List<BankItem>> e : staying.entrySet())
 		{
-			int[] ranks = ranks(e.getValue(), order);
+			int[] ranks = ranks(e.getValue(), orderByTab.getOrDefault(e.getKey(), order));
 			int[] lis = lis(ranks);
 			lisByTab.put(e.getKey(), lis);
 			outOfPlace += ranks.length - lis.length;
@@ -155,7 +169,7 @@ final class Planner
 		Step next = nextCrossTabMove(feasible, tabSizes, numTabs, viewTab);
 		if (next == null)
 		{
-			next = nextReorder(staying, lisByTab, viewTab, order);
+			next = nextReorder(staying, lisByTab, viewTab, order, orderByTab);
 		}
 		return new Plan(next, outOfPlace, wrongTab, icons, warnings);
 	}
@@ -209,7 +223,7 @@ final class Planner
 	}
 
 	private static Step nextReorder(Map<Integer, List<BankItem>> staying,
-		Map<Integer, int[]> lisByTab, int viewTab, Comparator<BankItem> order)
+		Map<Integer, int[]> lisByTab, int viewTab, Comparator<BankItem> order, Map<Integer, Comparator<BankItem>> orderByTab)
 	{
 		// the viewed tab first, then tabs 1-9, then the main section
 		List<Integer> tabOrder = new ArrayList<>();
@@ -231,7 +245,7 @@ final class Planner
 			{
 				return new Step(StepType.OPEN_TAB, null, t, -1, false);
 			}
-			return reorderStep(current, lisByTab.get(t), order);
+			return reorderStep(current, lisByTab.get(t), orderByTab.getOrDefault(t, order));
 		}
 		return new Step(StepType.DONE, null, -1, -1, false);
 	}

@@ -33,10 +33,11 @@ final class ItemRules
 
 	private static final List<String> TELEPORT_ITEMS = Arrays.asList(
 		"xeric's talisman", "drakan's medallion", "royal seed pod", "ectophial", "enchanted lyre",
-		"pharaoh's sceptre", "chronicle", "teleport crystal", "ardougne cloak", "karamja gloves",
+		"pharaoh's sceptre", "chronicle", "teleport crystal", "ardougne cloak", "dramen staff", "lunar staff",
+		"karamja gloves",
 		"desert amulet", "morytania legs", "fremennik sea boots", "kandarin headgear", "western banner", "wilderness sword",
 		"rada's blessing", "explorer's ring", "ghommal's hilt", "kharedst's memoirs", "book of the dead",
-		"master scroll book", "quetzal whistle", "dramen staff", "lunar staff", "construct. cape",
+		"master scroll book", "quetzal whistle", "construct. cape",
 		"crystal of memories", "eternal teleport crystal", "mythical cape");
 
 	private static final List<String> SKILLING_TOOLS = Arrays.asList(
@@ -685,6 +686,68 @@ final class ItemRules
 			}
 		}
 		return best;
+	}
+
+	/**
+	 * Groups without a fixed tier order, where items are grouped by the words they share with other items
+	 * in the bank. Groups with their own order (ores, herbs, gems, runes, gear...) keep it.
+	 */
+	static boolean isLoose(Rule rule, int group)
+	{
+		switch (rule)
+		{
+			case MONEY:
+			case FOOD:
+			case COSMETIC:
+			case MISC:
+				return true;
+			case POTIONS:
+				return group == POTION_ORDER.length;
+			case TELEPORTS:
+				// the listed teleport items (group 3) keep the list's order
+				return group == 0 || group == 2;
+			case RUNES:
+				return group == AMMO_OTHER || group == AMMO_CHINCHOMPAS;
+			case SKILLING:
+				return group % 100 == TOOL_OTHER || group % 100 == SKILL_ITEMS_GROUP;
+			case RESOURCES:
+				switch (group % 100)
+				{
+					case GROUP_OTHER_SEEDS:
+					case GROUP_FARMING:
+					case GROUP_SECONDARIES:
+					case GROUP_HIDES:
+					case GROUP_CRAFTING:
+					case GROUP_BONES:
+					case GROUP_ASHES:
+					case GROUP_ENSOULED:
+					case GROUP_RAW_FOOD:
+					case GROUP_CONTAINERS:
+						return true;
+					default:
+						return false;
+				}
+			default:
+				return false;
+		}
+	}
+
+	private static final List<String> STOP_WORDS = Arrays.asList("of", "the", "and", "with", "for");
+
+	/**
+	 * The words of a name that can link it to other items: no brackets, numbers or little words.
+	 */
+	static List<String> words(String base)
+	{
+		List<String> out = new java.util.ArrayList<>();
+		for (String w : base.replaceAll("\\(.*?\\)", " ").split("[^a-z0-9'+-]+"))
+		{
+			if (w.length() >= 3 && !STOP_WORDS.contains(w) && !w.matches("[0-9/+-]+"))
+			{
+				out.add(w);
+			}
+		}
+		return out;
 	}
 
 	/**

@@ -7,6 +7,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
+import net.runelite.client.config.Units;
 
 @ConfigGroup(BankStewardConfig.GROUP)
 public interface BankStewardConfig extends Config
@@ -73,9 +74,21 @@ public interface BankStewardConfig extends Config
 	String sortingSection = "sorting";
 
 	@ConfigItem(
+		keyName = "showCategoryMarkers",
+		name = "Show category markers",
+		description = "Mark each bank item with its category's colour",
+		section = displaySection,
+		position = -1
+	)
+	default boolean showCategoryMarkers()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "markerStyle",
 		name = "Category marker",
-		description = "How each item's category colour is drawn in the bank",
+		description = "How each item's category colour is drawn in the bank, when category markers are on",
 		section = displaySection,
 		position = 0
 	)
@@ -84,17 +97,18 @@ public interface BankStewardConfig extends Config
 		return MarkerStyle.CORNER;
 	}
 
-	@Range(min = 30, max = 255)
+	@Range(min = 10, max = 100)
+	@Units(Units.PERCENT)
 	@ConfigItem(
-		keyName = "markerOpacity",
-		name = "Marker opacity",
-		description = "Opacity of the category markers (30-255)",
+		keyName = "categoryOpacity",
+		name = "Category colour opacity",
+		description = "How strong category colours are, on the item markers and the bars under the tab headers",
 		section = displaySection,
 		position = 1
 	)
-	default int markerOpacity()
+	default int categoryOpacity()
 	{
-		return 220;
+		return 60;
 	}
 
 	@ConfigItem(

@@ -27,7 +27,10 @@ Press **Organise** and follow the highlights: the item to move, where to drop it
 There are 11 to start with, including Gear, Teleports, Potions, Skilling and High alch. Rename, recolour, reorder or add your own, and pick a bank tab for each.
 
 - Right-click a bank item to change its category, or a bank tab to file everything in it.
-- Gear is grouped by set, skilling items by skill, potions by dose, and items with similar names sit together.
+- Gear is grouped by combat style, then weapon kind and armour set. Skilling items go skill by skill, and potions highest dose first.
+- Items in your bank that share a word sit together, like all your buckets or all your burnt food.
+- Items used with each other sit side by side when they're in the same tab, like each unfinished potion and its secondary, or a chisel and uncut gems.
+- Category colours can be shown on items and under tab headers, at whatever opacity you like.
 
 <p align="center">
   <b>Side panel</b><br>

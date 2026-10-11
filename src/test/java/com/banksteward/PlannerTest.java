@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import net.runelite.client.game.ItemEquipmentStats;
 import static org.junit.Assert.assertArrayEquals;
@@ -235,7 +236,7 @@ public class PlannerTest
 
 	private static List<String> sortedNames(List<BankItem> items, String categoryId)
 	{
-		items.sort(ItemSorter.comparator(Collections.singletonMap(categoryId, 0), BankStewardConfig.GearSort.STYLE));
+		items.sort(ItemSorter.comparator(Collections.singletonMap(categoryId, 0), BankStewardConfig.GearSort.STYLE, new ArrayList<>(items)));
 		List<String> out = new ArrayList<>();
 		for (BankItem b : items)
 		{
@@ -523,5 +524,94 @@ public class PlannerTest
 		assertTrue(plan.getNext().getTargetSlot() >= 1);
 		assertEquals(1, plan.getOutOfPlace());
 		assertTrue(plan.getTabIcons().contains(0));
+	}
+
+	@Test
+	public void iconsGroupFollowsIt()
+	{
+		ItemEquipmentStats helm = ItemEquipmentStats.builder().slot(0).amagic(-6).arange(-3).dstab(30).build();
+		ItemEquipmentStats body = ItemEquipmentStats.builder().slot(4).amagic(-30).arange(-15).dstab(82).build();
+		ItemEquipmentStats sickle = ItemEquipmentStats.builder().slot(3).dslash(1).str(1).build();
+		Category c = cat("gear", 1);
+		List<BankItem> items = new ArrayList<>();
+		// tab 1: rune full helm is the icon, then the sickle, then the platebody
+		items.add(new BankItem(0, 1163, 1, ItemRules.classify(1163, "Rune full helm", true, helm, null, 1), c));
+		items.add(new BankItem(1, 2961, 1, ItemRules.classify(2961, "Silver sickle", true, sickle, null, 1), c));
+		items.add(new BankItem(2, 1127, 1, ItemRules.classify(1127, "Rune platebody", true, body, null, 1), c));
+		Comparator<BankItem> order = ItemSorter.comparator(Collections.singletonMap("gear", 0), BankStewardConfig.GearSort.STYLE, items);
+		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 3), 1, order, true);
+		// the platebody belongs next to the helm, so the sickle has to move after it
+		assertEquals(Planner.StepType.REORDER, plan.getNext().getType());
+		assertEquals(1, plan.getOutOfPlace());
+		assertEquals("sickle", ItemSorter.family(ItemRules.classify(2963, "Silver sickle (b)", true, sickle, null, 1)));
+	}
+
+	@Test
+	public void itemsSharingAWordInTheBankGoTogether()
+	{
+		// no rules for any of these: they group by the words they share
+		assertEquals(Arrays.asList("Goblin mail", "Goblin skull", "Strange fruit", "Strange shard", "Zogre tooth"),
+			sortAll(new Object[][]{
+				{"Strange shard", false, -1, null}, {"Goblin skull", false, -1, null}, {"Zogre tooth", false, -1, null},
+				{"Goblin mail", false, -1, null}, {"Strange fruit", false, -1, null}}));
+		// a word shared by more items wins: three "shard"s beat two "blue"s
+		List<String> order = sortAll(new Object[][]{
+			{"Blue shard", false, -1, null}, {"Ancient shard", false, -1, null}, {"Blue key", false, -1, null},
+			{"Dark shard", false, -1, null}});
+		assertEquals(Arrays.asList("Blue key", "Ancient shard", "Blue shard", "Dark shard"), order);
+	}
+
+	@Test
+	public void stavesAreMagicAndFairyRingItemsSitTogether()
+	{
+		// a staff with more crush than magic attack is still a magic weapon
+		ItemEquipmentStats fireStaff = ItemEquipmentStats.builder().slot(3).acrush(7).str(5).amagic(10).build();
+		assertEquals(2, ItemSorter.style(ItemRules.classify(1387, "Staff of fire", true, fireStaff, null, 1)));
+
+		List<String> order = sortAll(new Object[][]{
+			{"Lunar staff", true, 3, null}, {"Karamja gloves 3", true, 9, null}, {"Ardougne cloak 2", true, 1, null},
+			{"Dramen staff", true, 3, null}, {"Desert amulet 2", true, 2, null}});
+		int cloak = order.indexOf("Ardougne cloak 2");
+		assertEquals("Dramen staff", order.get(cloak + 1));
+		assertEquals("Lunar staff", order.get(cloak + 2));
+	}
+
+	@Test
+	public void itemsUsedTogetherSitTogetherInTheSameTab()
+	{
+		Category res = cat("resources", 7);
+		Category tools = cat("skilling", 6);
+		List<BankItem> items = new ArrayList<>();
+		items.add(new BankItem(0, 1, 7, ItemRules.classify(1, "Snape grass", false, null, null, 1), res));
+		items.add(new BankItem(1, 2, 7, ItemRules.classify(2, "Ranarr potion (unf)", false, null, null, 1), res));
+		items.add(new BankItem(2, 3, 7, ItemRules.classify(3, "Toadflax potion (unf)", false, null, null, 1), res));
+		items.add(new BankItem(3, 4, 7, ItemRules.classify(4, "Uncut ruby", false, null, null, 1), res));
+		// the chisel's category uses another tab, so it doesn't move in beside the gems
+		items.add(new BankItem(4, 5, 6, ItemRules.classify(5, "Chisel", false, null, null, 1), tools));
+		Map<String, Integer> order = new java.util.HashMap<>();
+		order.put("resources", 0);
+		order.put("skilling", 1);
+		items.sort(ItemSorter.comparator(order, BankStewardConfig.GearSort.STYLE, new ArrayList<>(items)));
+		List<String> names = new ArrayList<>();
+		for (BankItem b : items)
+		{
+			names.add(b.getInfo().getName());
+		}
+		int ranarr = names.indexOf("Ranarr potion (unf)");
+		assertEquals("Snape grass", names.get(ranarr + 1));
+		assertEquals("Chisel", names.get(names.size() - 1));
+
+		// in the same tab, the chisel goes right before the uncut gems
+		List<BankItem> sameTab = new ArrayList<>();
+		sameTab.add(new BankItem(0, 4, 7, ItemRules.classify(4, "Uncut ruby", false, null, null, 1), res));
+		sameTab.add(new BankItem(1, 6, 7, ItemRules.classify(6, "Coal", false, null, null, 1), res));
+		sameTab.add(new BankItem(2, 5, 7, ItemRules.classify(5, "Chisel", false, null, null, 1), res));
+		sameTab.sort(ItemSorter.comparator(Collections.singletonMap("resources", 0), BankStewardConfig.GearSort.STYLE, new ArrayList<>(sameTab)));
+		List<String> n2 = new ArrayList<>();
+		for (BankItem b : sameTab)
+		{
+			n2.add(b.getInfo().getName());
+		}
+		assertEquals(n2.indexOf("Uncut ruby") - 1, n2.indexOf("Chisel"));
 	}
 }

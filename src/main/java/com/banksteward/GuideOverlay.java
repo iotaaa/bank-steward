@@ -139,7 +139,7 @@ class GuideOverlay extends Overlay
 				}
 				int x0 = x + width * i / n;
 				int x1 = x + width * (i + 1) / n;
-				g.setColor(Fade.of(c.getColor()));
+				g.setColor(Fade.category(c.getColor(), config.categoryOpacity()));
 				g.fillRect(x0, r.y + r.height - 4, x1 - x0, 3);
 				i++;
 			}
