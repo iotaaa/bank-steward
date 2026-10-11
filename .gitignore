@@ -1,0 +1,16 @@
+.gradle
+build
+.idea/
+.project
+.settings/
+.classpath
+nbactions.xml
+nb-configuration.xml
+nbproject/
+*.class
+# Local notes, not published
+*.md
+!README.md
+# Local dev setup (loads Alch Ledger alongside for testing), not published
+local.gradle
+local-test/
