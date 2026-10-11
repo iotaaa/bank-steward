@@ -482,11 +482,6 @@ final class ItemSorter
 		return score(info.getStats(), style(info));
 	}
 
-	static int score(ItemEquipmentStats s)
-	{
-		return score(s, style(s));
-	}
-
 	private static int score(ItemEquipmentStats s, int style)
 	{
 		if (s == null)

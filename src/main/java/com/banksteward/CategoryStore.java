@@ -39,7 +39,6 @@ class CategoryStore
 	private List<Category> categories = new ArrayList<>();
 	private final Map<Integer, String> overrides = new HashMap<>();
 	private final Map<String, List<Pattern>> compiledPatterns = new HashMap<>();
-	private int version;
 
 	@Inject
 	CategoryStore(ConfigManager configManager, Gson gson)
@@ -102,7 +101,6 @@ class CategoryStore
 			}
 		}
 		compilePatterns();
-		version++;
 	}
 
 	private static List<Category> defaults()
@@ -135,7 +133,6 @@ class CategoryStore
 		}
 		configManager.setConfiguration(BankStewardConfig.GROUP, BankStewardConfig.OVERRIDES_KEY, sb.toString());
 		compilePatterns();
-		version++;
 	}
 
 	private void compilePatterns()
@@ -170,13 +167,6 @@ class CategoryStore
 		}
 	}
 
-	/**
-	 * Bumped on every change so callers can tell when cached results are stale.
-	 */
-	synchronized int getVersion()
-	{
-		return version;
-	}
 
 	synchronized List<Category> getCategories()
 	{
@@ -200,20 +190,6 @@ class CategoryStore
 		return null;
 	}
 
-	/**
-	 * Category index in the list, which is also the order categories appear in a shared tab.
-	 */
-	synchronized int indexOf(String id)
-	{
-		for (int i = 0; i < categories.size(); i++)
-		{
-			if (categories.get(i).getId().equals(id))
-			{
-				return i;
-			}
-		}
-		return Integer.MAX_VALUE;
-	}
 
 	/**
 	 * The category an item is in: a manual choice first, then name patterns, then the built-in rule.
@@ -319,6 +295,18 @@ class CategoryStore
 		categories.removeIf(c -> c.getId().equals(id));
 		overrides.values().removeIf(id::equals);
 		save();
+	}
+
+	private int indexOf(String id)
+	{
+		for (int i = 0; i < categories.size(); i++)
+		{
+			if (categories.get(i).getId().equals(id))
+			{
+				return i;
+			}
+		}
+		return Integer.MAX_VALUE;
 	}
 
 	synchronized void move(String id, int delta)

@@ -1,7 +1,6 @@
 package com.banksteward;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -345,8 +344,4 @@ final class Planner
 		return out;
 	}
 
-	static int[] tabSizes(int... sizes)
-	{
-		return Arrays.copyOf(sizes, 10);
-	}
 }

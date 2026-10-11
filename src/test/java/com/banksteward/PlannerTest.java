@@ -17,6 +17,11 @@ public class PlannerTest
 {
 	private static final Comparator<BankItem> BY_ID = Comparator.comparingInt(b -> b.getInfo().getId());
 
+	private static int[] tabSizes(int... sizes)
+	{
+		return Arrays.copyOf(sizes, 10);
+	}
+
 	private static BankItem item(int slot, int id, int tab, Category category)
 	{
 		ItemInfo info = new ItemInfo(id, "Item " + id, "item " + id, 0, Rule.MISC, 0, 0, 0, null, "");
@@ -64,7 +69,7 @@ public class PlannerTest
 				{
 					items.add(item(i, ids.get(i), 0, none));
 				}
-				Planner.Plan plan = Planner.plan(items, Planner.tabSizes(), 0, BY_ID);
+				Planner.Plan plan = Planner.plan(items, tabSizes(), 0, BY_ID);
 				if (plan.getNext().getType() == Planner.StepType.DONE)
 				{
 					break;
@@ -96,7 +101,7 @@ public class PlannerTest
 		items.add(item(1, 20, 1, food));
 		items.add(item(2, 21, 2, food));
 		items.add(item(3, 11, 2, gear));
-		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 2, 2), 0, BY_ID);
+		Planner.Plan plan = Planner.plan(items, tabSizes(0, 2, 2), 0, BY_ID);
 		assertEquals(2, plan.getWrongTab().size());
 		Planner.Step step = plan.getNext();
 		assertEquals(Planner.StepType.MOVE_TO_TAB, step.getType());
@@ -115,7 +120,7 @@ public class PlannerTest
 		items.add(item(1, 20, 2, food));
 		items.add(item(2, 11, 2, gear));
 		// viewing tab 1, but the wrong item is in tab 2
-		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 1, 2), 1, BY_ID);
+		Planner.Plan plan = Planner.plan(items, tabSizes(0, 1, 2), 1, BY_ID);
 		assertEquals(Planner.StepType.OPEN_TAB, plan.getNext().getType());
 		assertEquals(0, plan.getNext().getTab());
 	}
@@ -130,7 +135,7 @@ public class PlannerTest
 		items.add(item(0, 10, 1, gear));
 		items.add(item(1, 20, 1, food));
 		items.add(item(2, 30, 1, runes));
-		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 3), 0, BY_ID);
+		Planner.Plan plan = Planner.plan(items, tabSizes(0, 3), 0, BY_ID);
 		Planner.Step step = plan.getNext();
 		assertEquals(Planner.StepType.MOVE_TO_TAB, step.getType());
 		assertEquals(2, step.getTab());
@@ -147,7 +152,7 @@ public class PlannerTest
 		// tab 1 has only a misc item; moving it out first would delete tab 1
 		items.add(item(0, 50, 1, misc));
 		items.add(item(1, 10, 0, gear));
-		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 1), 0, BY_ID);
+		Planner.Plan plan = Planner.plan(items, tabSizes(0, 1), 0, BY_ID);
 		assertEquals(10, plan.getNext().getItem().getItemId());
 	}
 
@@ -158,7 +163,7 @@ public class PlannerTest
 		List<BankItem> items = new ArrayList<>();
 		items.add(item(0, 10, 1, gear));
 		items.add(item(1, 11, 1, gear));
-		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 2), 1, BY_ID);
+		Planner.Plan plan = Planner.plan(items, tabSizes(0, 2), 1, BY_ID);
 		assertEquals(Planner.StepType.DONE, plan.getNext().getType());
 		assertEquals(0, plan.getOutOfPlace());
 	}
@@ -516,7 +521,7 @@ public class PlannerTest
 		items.add(item(0, 20, 1, food));
 		items.add(item(1, 12, 1, gear));
 		items.add(item(2, 11, 1, gear));
-		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 3), 1, BY_ID, true);
+		Planner.Plan plan = Planner.plan(items, tabSizes(0, 3), 1, BY_ID, true);
 		// the icon isn't moved to tab 2 or sorted; only the gear is reordered, behind it
 		assertTrue(plan.getWrongTab().isEmpty());
 		assertEquals(Planner.StepType.REORDER, plan.getNext().getType());
@@ -539,7 +544,7 @@ public class PlannerTest
 		items.add(new BankItem(1, 2961, 1, ItemRules.classify(2961, "Silver sickle", true, sickle, null, 1), c));
 		items.add(new BankItem(2, 1127, 1, ItemRules.classify(1127, "Rune platebody", true, body, null, 1), c));
 		Comparator<BankItem> order = ItemSorter.comparator(Collections.singletonMap("gear", 0), BankStewardConfig.GearSort.STYLE, items);
-		Planner.Plan plan = Planner.plan(items, Planner.tabSizes(0, 3), 1, order, true);
+		Planner.Plan plan = Planner.plan(items, tabSizes(0, 3), 1, order, true);
 		// the platebody belongs next to the helm, so the sickle has to move after it
 		assertEquals(Planner.StepType.REORDER, plan.getNext().getType());
 		assertEquals(1, plan.getOutOfPlace());
