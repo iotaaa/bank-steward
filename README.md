@@ -1,6 +1,6 @@
 # Bank Steward
 
-Sorts your bank into categories and guides you through tidying it, one move at a time.
+Sorts your bank into categories, shows you the finished layout instantly, and guides you through tidying it one move at a time.
 
 <table align="center">
   <tr>
@@ -11,15 +11,23 @@ Sorts your bank into categories and guides you through tidying it, one move at a
 
 ## Preview
 
-See your whole bank already organised, as a tag tab you can withdraw from straight away.
+Press **Preview** to see your whole bank already organised, with each category on its own rows. It opens as a tag tab, so you can withdraw from it straight away without moving anything.
 
 ## Organise
 
-Shows the item to move and where to drop it, using the fewest moves possible. Each tab's first item is kept as its icon. Turn on **Insert** mode in the bank first.
+Press **Organise** and follow the highlights: the item to move, where to drop it, and an arrow between them.
+
+- It plans the whole bank: items go into the right tab first, then each tab is put in order, using the fewest moves possible.
+- If you do something different, it just works out the next move.
+- Each tab's first item is its icon, so it's left where it is and marked in gold.
+- Turn on **Insert** mode at the bottom of the bank first. The guide reminds you if it's off.
 
 ## Categories
 
-Rename, recolour, reorder or add categories and pick a tab for each. Right-click any bank item to change its category. Items are grouped sensibly: gear by set, skilling items by skill, potions by dose, and similar names together.
+There are 11 to start with, including Gear, Teleports, Potions, Skilling and High alch. Rename, recolour, reorder or add your own, and pick a bank tab for each.
+
+- Right-click a bank item to change its category, or a bank tab to file everything in it.
+- Gear is grouped by set, skilling items by skill, potions by dose, and items with similar names sit together.
 
 <p align="center">
   <b>Side panel</b><br>
@@ -28,7 +36,7 @@ Rename, recolour, reorder or add categories and pick a tab for each. Right-click
 
 ## Alch Ledger
 
-With [Alch Ledger](https://runelite.net/plugin-hub/show/alch-ledger) on, its bank outlines hide while you organise, and profitable alchs can go in the High alch category.
+If you also use [Alch Ledger](https://runelite.net/plugin-hub/show/alch-ledger), its bank outlines hide while you organise, and you can turn on **File profitable alchs** to put profitable items in the High alch category.
 
 ## Author
 
